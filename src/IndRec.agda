@@ -13,7 +13,7 @@ module IndRec where
 
 -- Core
 
-record IRF (F : (A : Set) → (A → Set) → Set) : Set₁ where
+record Functor (F : (A : Set) → (A → Set) → Set) : Set₁ where
   field
     All     : ∀ {A i} (P : A → Set) → F A i → Set
     all     : ∀ {A i} (P : A → Set) (p : ∀ x → P x) (xs : F A i) → All P xs
@@ -26,20 +26,20 @@ record IRF (F : (A : Set) → (A → Set) → Set) : Set₁ where
                 ≡ collect _ (all _ (g ∘ f) xs)
 
     interpret : ∀ {A} r → F A r → Set
-open IRF ⦃...⦄
+open Functor ⦃...⦄
 
 postulate
-  Fix : ∀ F → ⦃ IRF F ⦄ → Set
-  fixInterpret : ∀ {F} → ⦃ _ : IRF F ⦄ → Fix F → Set
-  fix : ∀ {F} ⦃ _ : IRF F ⦄ → F (Fix F) fixInterpret → Fix F
-  fixInterpretβ : ∀ {F} ⦃ _ : IRF F ⦄ (a : F (Fix F) fixInterpret) 
+  Fix : ∀ F → ⦃ Functor F ⦄ → Set
+  fixInterpret : ∀ {F} → ⦃ _ : Functor F ⦄ → Fix F → Set
+  fix : ∀ {F} ⦃ _ : Functor F ⦄ → F (Fix F) fixInterpret → Fix F
+  fixInterpretβ : ∀ {F} ⦃ _ : Functor F ⦄ (a : F (Fix F) fixInterpret) 
                 → fixInterpret (fix a) ≡ interpret fixInterpret a
 
-  Fix-elim : ∀ {F} ⦃ _ : IRF F ⦄
+  Fix-elim : ∀ {F} ⦃ _ : Functor F ⦄
                 (P : Fix F → Set)
             → (∀ (d : F (Fix F) _) → All P d → P (fix d)) 
             → ∀ x → P x
-  fixβ : ∀ {F} ⦃ _ : IRF F ⦄ 
+  fixβ : ∀ {F} ⦃ _ : Functor F ⦄ 
           (P : Fix F → Set) 
           (m : ∀ (d : F (Fix F) _) → All P d → P (fix d)) d
         → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)
@@ -48,11 +48,11 @@ postulate
 
 -- Utils
 
-fmap : ∀ {F} ⦃ _ : IRF F ⦄ {A B C} 
+fmap : ∀ {F} ⦃ _ : Functor F ⦄ {A B C} 
     → (A → B) → F A (λ _ → C) → F B (λ _ → C)
 fmap f xs = collect xs (all _ f xs)
 
--- Example: Inductive Recursive Universe containing ⊤ and Π types
+-- Example: Inductive-recursive universe containing ⊤ and Π types
 
 UD : (u : Set) → (u → Set) → Set
 UD u i = ⊤ + Σ u (λ a → i a → u)
@@ -75,7 +75,7 @@ UD-collect : ∀ {A B C} (xs : UD A (λ _ → C)) → UD-All (λ _ → B) xs
 UD-collect (inl tt) tt = inl tt
 UD-collect (inr (a , b)) (p , q) = inr (p , q)
 
-instance UD-Functor : IRF UD
+instance UD-Functor : Functor UD
 
 UD-Functor .All = UD-All
 UD-Functor .all = UD-all

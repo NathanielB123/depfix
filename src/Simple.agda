@@ -47,7 +47,7 @@ Fix-fold {F} {A} f xs
 unfix : ∀ {F : Set → Set} ⦃ _ : Functor F ⦄ → Fix F → F (Fix F)
 unfix xs = Fix-fold (fmap fix) xs
 
--- Example: Natural Numbers
+-- Example: Natural numbers
 
 NatD : Set → Set
 NatD N = ⊤ + N
