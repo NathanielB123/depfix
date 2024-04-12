@@ -7,6 +7,10 @@ module IndRecUtils where
 unfix : ∀ {B F} ⦃ _ : Functor B F ⦄ → Fix F → F (Fix F) fixInterpret
 unfix = Fix-elim _ (λ d _ → d)
 
+fmap : ∀ {F} ⦃ _ : Functor Set F ⦄ {A B C} 
+    → (A → B) → F A (λ _ → C) → F B (λ _ → C)
+fmap f xs = collect xs (all _ f xs)
+
 record Foldable (B : Set₁) (F : (A : Set) → (A → B) → Set) : Set₁ where
   field
     ⦃ functor ⦄ : Functor B F
