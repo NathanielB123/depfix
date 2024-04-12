@@ -13,7 +13,7 @@ module IndRec where
 
 -- Core
 
-record Functor (F : (A : Set) → (A → Set) → Set) : Set₁ where
+record Functor (B : Set₁) (F : (A : Set) → (A → B) → Set) : Set₁ where
   field
     All     : ∀ {A i} (P : A → Set) → F A i → Set
     all     : ∀ {A i} (P : A → Set) (p : ∀ x → P x) (xs : F A i) → All P xs
@@ -25,30 +25,30 @@ record Functor (F : (A : Set) → (A → Set) → Set) : Set₁ where
                 → collect _ (all _ g (collect _ (all _ f xs))) 
                 ≡ collect _ (all _ (g ∘ f) xs)
 
-    interpret : ∀ {A} r → F A r → Set
-open Functor ⦃...⦄
+    interpret : ∀ {A} r → F A r → B
+open Functor ⦃...⦄ public
 
 postulate
-  Fix : ∀ F → ⦃ Functor F ⦄ → Set
-  fixInterpret : ∀ {F} → ⦃ _ : Functor F ⦄ → Fix F → Set
-  fix : ∀ {F} ⦃ _ : Functor F ⦄ → F (Fix F) fixInterpret → Fix F
-  fixInterpretβ : ∀ {F} ⦃ _ : Functor F ⦄ (a : F (Fix F) fixInterpret) 
+  Fix : ∀ {B} F → ⦃ Functor B F ⦄ → Set
+  fixInterpret : ∀ {B F} → ⦃ _ : Functor B F ⦄ → Fix F → B
+  fix : ∀ {B F} ⦃ _ : Functor B F ⦄ → F (Fix F) fixInterpret → Fix F
+  fixInterpretβ : ∀ {B} {F} ⦃ _ : Functor B F ⦄ (a : F (Fix F) fixInterpret) 
                 → fixInterpret (fix a) ≡ interpret fixInterpret a
 
-  Fix-elim : ∀ {F} ⦃ _ : Functor F ⦄
-                (P : Fix F → Set)
-            → (∀ (d : F (Fix F) _) → All P d → P (fix d)) 
-            → ∀ x → P x
-  fixβ : ∀ {F} ⦃ _ : Functor F ⦄ 
-          (P : Fix F → Set) 
-          (m : ∀ (d : F (Fix F) _) → All P d → P (fix d)) d
-        → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)
+  Fix-elim : ∀ {B} {F} ⦃ _ : Functor B F ⦄
+               (P : Fix F → Set)
+           → (∀ (d : F (Fix F) _) → All P d → P (fix d)) 
+           → ∀ x → P x
+  fixβ : ∀ {B} {F} ⦃ _ : Functor B F ⦄ 
+           (P : Fix F → Set) 
+           (m : ∀ (d : F (Fix F) _) → All P d → P (fix d)) d
+       → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)
 
 {-# REWRITE fixInterpretβ fixβ #-}
 
 -- Utils
 
-fmap : ∀ {F} ⦃ _ : Functor F ⦄ {A B C} 
+fmap : ∀ {F} ⦃ _ : Functor Set F ⦄ {A B C} 
     → (A → B) → F A (λ _ → C) → F B (λ _ → C)
 fmap f xs = collect xs (all _ f xs)
 
@@ -75,7 +75,7 @@ UD-collect : ∀ {A B C} (xs : UD A (λ _ → C)) → UD-All (λ _ → B) xs
 UD-collect (inl tt) tt = inl tt
 UD-collect (inr (a , b)) (p , q) = inr (p , q)
 
-instance UD-Functor : Functor UD
+instance UD-Functor : Functor Set UD
 
 UD-Functor .All = UD-All
 UD-Functor .all = UD-all

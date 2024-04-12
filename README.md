@@ -7,4 +7,4 @@ Positive (but not strictly!) iso-recursive types implemented in Agda with `postu
 - Inductive-Inductive Types: WIP
 - Indexed Types: WIP
 
-If anyone knows of any papers/other resources exploring this or similar approaches to adding recursive types in dependent type systems please let me know; I have really struggled to find anything!
+If anyone knows of any papers/other resources exploring similar approaches to adding recursive types in dependent type systems please let me know; I've really struggled to find anything!

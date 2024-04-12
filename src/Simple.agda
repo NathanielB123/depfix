@@ -22,7 +22,7 @@ record Functor (F : Set → Set) : Set₁ where
     composition : ∀ {A B C} (f : A → B) (g : B → C) xs 
                 → collect _ (all _ g (collect _ (all _ f xs))) 
                 ≡ collect _ (all _ (g ∘ f) xs)
-open Functor ⦃...⦄
+open Functor ⦃...⦄ public
 
 postulate
   Fix : ∀ (F : Set → Set) → ⦃ Functor F ⦄ → Set
