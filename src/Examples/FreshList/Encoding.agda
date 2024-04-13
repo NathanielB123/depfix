@@ -16,17 +16,13 @@ open import Utils
 
 module Examples.FreshList.Encoding where
 
-module _ (A : Set) (R : Rel A 0ℓ) where
+module _ (A : Set) where
 
   List#D : (L : Set) → (L → A → Set) → Set
   List#D L fresh = ⊤ + Σ (A × L) (λ where (a , as) → fresh as a)
 
   pattern [] = inl tt
   pattern cons x xs f = inr ((x , xs) , f)
-
-  freshD : ∀ {L} r → List#D L r → A → Set
-  freshD r [] a = ⊤
-  freshD r (cons x xs _) a = R a x × r xs a
 
   List#D-All : ∀ {L i} (P : L → Set) → List#D L i → Set
   List#D-All P [] = ⊤
@@ -37,30 +33,39 @@ module _ (A : Set) (R : Rel A 0ℓ) where
   List#D-all P p [] = tt
   List#D-all P p (cons x xs a) = p xs
 
-  List#D-collect : ∀ {A B C} (xs : List#D A (λ _ → C)) → List#D-All (λ _ → B) xs 
-              → List#D B (λ _ → C)
+  List#D-collect : ∀ {A B C} (xs : List#D A (λ _ → C)) 
+                  → List#D-All (λ _ → B) xs → List#D B (λ _ → C)
   List#D-collect [] tt = []
   List#D-collect (cons x xs a) p = cons x p a
 
-  List#D-Functor : Functor (A → Set) List#D
-  List#D-Functor .All = List#D-All
-  List#D-Functor .all = List#D-all
-  List#D-Functor .collect = List#D-collect
-  List#D-Functor .identity [] = refl
-  List#D-Functor .identity (cons x xs a) = refl
-  List#D-Functor .composition f g [] = refl
-  List#D-Functor .composition f g (cons x xs a) = refl
-  List#D-Functor .interpret = freshD
+  module _ (R : Rel A 0ℓ) where
 
-instance List#D-Functor2 : ∀ {A : Set} {R : Rel A 0ℓ} 
-                         → Functor (A → Set) (List#D A R)
-List#D-Functor2 {A} {R} = List#D-Functor A R
+    freshD : ∀ {L} r → List#D L r → A → Set
+    freshD r [] a = ⊤
+    freshD r (cons x xs _) a = R a x × r xs a
+
+    List#D-Functor : Functor (A → Set) List#D
+    List#D-Functor .All = List#D-All
+    List#D-Functor .all = List#D-all
+    List#D-Functor .collect = List#D-collect
+    List#D-Functor .identity [] = refl
+    List#D-Functor .identity (cons x xs a) = refl
+    List#D-Functor .composition f g [] = refl
+    List#D-Functor .composition f g (cons x xs a) = refl
+    List#D-Functor .interpret = freshD
 
 instance
-  List#DFoldable : ∀ {A : Set} {R : Rel A 0ℓ} 
-                 → Foldable (A → Set) (List#D A R)
-  List#DFoldable {R = R} .functor = List#D-Functor2 {R = R}
-  List#DFoldable .fold-interpret [] _ = ⊥
-  List#DFoldable .fold-interpret (cons x xs _) _ = fixInterpret xs x
-  List#DFoldable .collect-fix [] tt = inl tt
-  List#DFoldable .collect-fix (cons x xs f) p = cons x p f
+  List#D-Functor-inst : ∀ {A R} → Functor (A → Set) (List#D A)
+List#D-Functor-inst {R = R} = List#D-Functor _ R
+
+
+List#DFoldable : ∀ {A} R → Foldable (A → Set) (List#D A)
+List#DFoldable R .functor = List#D-Functor _ R
+List#DFoldable _ .fold-interpret [] _ = ⊥
+List#DFoldable _ .fold-interpret (cons x xs _) _ = fixInterpret xs x
+List#DFoldable _ .collect-fix [] tt = inl tt
+List#DFoldable _ .collect-fix (cons x xs f) p = cons x p f
+
+instance
+  List#DFoldable-inst : ∀ {A R} → Foldable (A → Set) (List#D A)
+List#DFoldable-inst {R = R} = List#DFoldable R 
