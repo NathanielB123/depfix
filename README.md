@@ -1,6 +1,6 @@
 # DepFix: Dependent Fixpoints!
 
-Positive (but not strictly!) iso-recursive types implemented in Agda with `postulate`s and `rewrite` rules. My main motivation with exploring this is to see if these ideas might work for the core theory of my own language (i.e. as an alternative to W-types).
+Positive (but not strictly!) iso-recursive types implemented in Agda with `postulate`s and `rewrite` rules. My main motivation with exploring this is to see if these ideas might work for the core theory of my own language (i.e. as an alternative to W-types). Take a look at the [Examples](./src/Examples)!
 
 - Positive Inductive Types: [Simple.agda](./src/Simple.agda)
 - Inductive-Recursive Types: [IndRec.agda](./src/IndRec.agda)
