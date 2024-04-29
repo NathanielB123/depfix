@@ -2,8 +2,9 @@
 
 import Agda.Builtin.Equality.Rewrite
 
-open import Relation.Binary.PropositionalEquality using (_≡_)
+open import Relation.Binary.PropositionalEquality using (_≡_) 
 open import Function.Base using (id; _∘_)
+open import Data.Product using (Σ; _,_; proj₁; proj₂)
 
 open import Utils
 
@@ -11,13 +12,32 @@ module Simple where
 
 record Functor (F : Set → Set) : Set₁ where
   field
-    All         : ∀ {A} (P : A → Set) → F A → Set
-    all         : ∀ {A} (P : A → Set) (p : ∀ x → P x) xs → All P xs
-    collect     : ∀ {A B} (xs : F A) → All (λ _ → B) xs → F B
-    identity    : ∀ {A} (xs : F A) → xs ≡ collect xs (all _ id xs)
-    composition : ∀ {A B C} (f : A → B) (g : B → C) xs 
-                → collect _ (all _ g (collect _ (all _ f xs))) 
-                ≡ collect _ (all _ (g ∘ f) xs)
+    All     : ∀ {A} (P : A → Set) → F A → Set
+    all     : ∀ {A} (P : A → Set) (p : ∀ x → P x) xs → All P xs
+    -- Thanks to Peio Borthelle on the Agda Zulip for suggesting this signature 
+    -- for 'collect'!
+    -- https://agda.zulipchat.com/#narrow/stream/238741-general/topic/Formalising.20Inductive.20Types/near/433118420
+    collect : ∀ {A P} (xs : F A) (ps : All P xs) → F (Σ A P)
+    discard : ∀ {A B} → F (Σ A (λ _ → B)) → F B
+
+  -- Note that 'replace' is all that is needed to state the functor laws
+  -- (i.e. splitting into 'collect' and 'discard' is overkill) but being able
+  -- to collect 'All's with non-constant predicates seems useful
+  replace : ∀ {A B} (xs : F A) (ps : All (λ _ → B) xs) → F B
+  replace xs = discard ∘ collect xs
+
+  fmap : ∀ {A B : Set} → (A → B) → F A → F B
+  fmap f xs = replace xs (all _ f xs)
+
+  field
+    discard-coh : ∀ {A B} (xs : F (Σ A (λ _ → B))) 
+                → fmap proj₂ xs ≡ discard xs
+    collect-fst : ∀ {A P} (xs : F A) (p : _) 
+                → fmap proj₁ (collect xs (all P p xs)) ≡ xs
+    fmap-id     : ∀ {A} (xs : F A) → fmap id xs ≡ xs
+    fmap-comp   : ∀ {A B C} (f : A → B) (g : B → C) xs 
+                → fmap g (fmap f xs) ≡ fmap (g ∘ f) xs
+
 open Functor ⦃...⦄ public
 
 postulate

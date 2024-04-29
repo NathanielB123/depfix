@@ -1,9 +1,11 @@
 {-# OPTIONS --cubical-compatible --rewriting #-}
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
+open import Relation.Binary.PropositionalEquality 
+  using (_≡_; refl; cong)
   renaming (trans to _∙_)
 open import Data.Unit using (⊤; tt)
-open import Function.Base using (_∘_; id)
+open import Data.Product using (_,_)
+open import Function using (_∘_; id)
 
 open import Utils
 open import Simple
@@ -18,26 +20,24 @@ NatD-All : ∀ {A} (P : A → Set) → NatD A → Set
 NatD-All P (inl tt) = ⊤
 NatD-All P (inr x) = P x
 
-instance
-  NatD-Functor : Functor NatD
-
-NatD-identity : ∀ {A} (xs : NatD A) → xs ≡ fmap id xs
-NatD-composition : ∀ {A B C} (f : A → B) (g : B → C) (xs : NatD A)
-                  → fmap g (fmap f xs) ≡ fmap (g ∘ f) xs
+instance NatD-Functor : Functor NatD
 
 NatD-Functor .All = NatD-All
 NatD-Functor .all P f (inl tt) = tt
 NatD-Functor .all P f (inr x) = f x
 NatD-Functor .collect (inl tt) tt = inl tt
-NatD-Functor .collect (inr x) p = inr p
-NatD-Functor .identity = NatD-identity
-NatD-Functor .composition = NatD-composition
+NatD-Functor .collect (inr x) p = inr (x , p)
+NatD-Functor .discard (inl tt) = inl tt
+NatD-Functor .discard (inr (_ , y)) = inr y
 
-NatD-identity (inl tt) = refl
-NatD-identity (inr x) = refl
-
-NatD-composition _ _ (inl tt) = refl
-NatD-composition _ _ (inr x) = refl
+NatD-Functor .discard-coh (inl tt) = refl
+NatD-Functor .discard-coh (inr (_ , _)) = refl
+NatD-Functor .collect-fst (inl tt) p = refl
+NatD-Functor .collect-fst (inr x) p = refl
+NatD-Functor .fmap-id (inl tt) = refl
+NatD-Functor .fmap-id (inr _) = refl
+NatD-Functor .fmap-comp f g (inl tt) = refl
+NatD-Functor .fmap-comp f g (inr _) = refl
 
 Nat = Fix NatD
 

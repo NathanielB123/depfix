@@ -15,8 +15,8 @@ record Functor (B : Set₁) (F : (A : Set) → (A → B) → Set) : Set₁ where
     all     : ∀ {A i} (P : A → Set) (p : ∀ x → P x) (xs : F A i) → All P xs
     collect : ∀ {A B C} (xs : F A (λ _ → C)) → All (λ _ → B) xs 
             → F B (λ _ → C)
-    
-    identity : ∀ {A B} (xs : F A (λ _ → B)) → xs ≡ collect _ (all _ id xs)
+  
+    identity    : ∀ {A B} (xs : F A (λ _ → B)) → xs ≡ collect _ (all _ id xs)
     composition : ∀ {A B C D} (f : A → B) (g : B → C) (xs : F A (λ _ → D)) 
                 → collect _ (all _ g (collect _ (all _ f xs))) 
                 ≡ collect _ (all _ (g ∘ f) xs)

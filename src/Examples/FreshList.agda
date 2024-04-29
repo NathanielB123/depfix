@@ -57,8 +57,8 @@ module _ {A B} {R : Rel A 0ℓ} {S : Rel B 0ℓ}
                                      (λ bs → ∀ {a} → a # as → f a # bs)
   map-simul = Fix-elim _ 
     (λ where []# tt → fix []# , (λ where tt → tt) 
-             (cons a as fr) (bs , map-#) → fix (cons (f a) bs (map-# fr)) 
-                                         , λ where (p , ps) → R⇒S p , map-# ps)
+             (cons a as fr) (map , map-#) → fix (cons (f a) map (map-# fr)) 
+                                          , λ where (p , ps) → R⇒S p , map-# ps)
 
   map : List# A R → List# B S
   map = proj₁ ∘ map-simul
@@ -77,15 +77,17 @@ module _ {R : Rel A 0ℓ} {S : Rel A 0ℓ} (R⇒S : ∀[ R ⇒ S ]) where
   map₂ = map id R⇒S
 
 ------------------------------------------------------------------------
--- Views (now predicates, because datatypes are banned!)
+-- Views (now predicates because green slime is scary!)
 
-Empty : ∀ {A R} → List#D A (List# A R) fixInterpret → Set
-Empty []# = ⊤
-Empty (cons _ _ _) = ⊥
+Empty : ∀ {A R} → List# A R → Set
+Empty xs = case unfix xs of λ where
+  []#      → ⊤
+  (_ ∷# _) → ⊥
 
-NonEmpty : ∀ {A R} → List#D A (List# A R) fixInterpret → Set
-NonEmpty []# = ⊥
-NonEmpty (cons _ _ _) = ⊤
+NonEmpty : ∀ {A R} → List# A R → Set
+NonEmpty xs = case unfix xs of λ where
+  []#      → ⊥
+  (_ ∷# _) → ⊤
 
 ------------------------------------------------------------------------
 -- Operations for reducing fresh lists
@@ -129,7 +131,7 @@ tail : ∀ {R} → List# A R → Maybe (List# A R)
 tail = Maybe.map proj₂ ∘′ uncons
 
 take-simul : ∀ {R} (n : ℕ) (as : List# A R) 
-           → Σ (List# A R) (λ as′ → ∀ a →  a # as → a # as′)
+           → Σ (List# A R) (λ as′ → ∀ a → a # as → a # as′)
 take-simul zero = Fix-elim _ λ _ _ → fix []# , λ a → _
 take-simul (suc n) = Fix-elim _ λ where
   []# p → fix []# , _
