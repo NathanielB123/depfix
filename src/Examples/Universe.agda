@@ -1,7 +1,7 @@
 {-# OPTIONS --cubical-compatible --rewriting #-}
 
 open import Data.Unit using (⊤; tt)
-open import Data.Product using (Σ; _,_)
+open import Data.Product using (Σ; _,_; proj₂)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
@@ -17,30 +17,26 @@ _⟦_⟧D : ∀ {A} r → UD A r → Set
 r ⟦ inl tt ⟧D = ⊤
 r ⟦ inr (A , B) ⟧D = (a : r A) → r (B a)
 
-UD-All : ∀ {u i} (P : u → Set) → UD u i → Set
-UD-All P (inl tt) = ⊤
-UD-All {i = i} P (inr (A , B)) 
-  = Σ (P A) (λ p → (a : i A) → P (B a))
-
-UD-all : ∀ {u i} (P : u → Set) (p : ∀ x → P x) (A : UD u i) → UD-All P A
-UD-all P p (inl tt) = tt
-UD-all P p (inr (a , b)) = p a , (p ∘ b)
-
-UD-collect : ∀ {A B C} (xs : UD A (λ _ → C)) → UD-All (λ _ → B) xs 
-            → UD B (λ _ → C)
-UD-collect (inl tt) tt = inl tt
-UD-collect (inr (a , b)) (p , q) = inr (p , q)
-
 instance UD-Functor : Functor Set UD
 
-UD-Functor .All = UD-All
-UD-Functor .all = UD-all
-UD-Functor .collect = UD-collect
-UD-Functor .identity (inl tt) = refl
-UD-Functor .identity (inr (a , b)) = refl
-UD-Functor .composition f g (inl tt) = refl
-UD-Functor .composition f g (inr (a , b)) = refl
 UD-Functor .interpret = _⟦_⟧D
+UD-Functor .All P (inl tt) = ⊤
+UD-Functor .All P (inr (A , B)) = Σ (P A) (λ p → ∀ a → P (B a))
+UD-Functor .all P p (inl tt) = tt
+UD-Functor .all P p (inr (a , b)) = p a , (p ∘ b)
+UD-Functor .collect (inl tt) tt = inl tt
+UD-Functor .collect (inr (a , b)) (p , q) = inr ((a , p) , (λ ia → b ia , q ia))
+UD-Functor .discard (inl tt) = inl tt
+UD-Functor .discard (inr ((a , p) , b)) = inr (p , (proj₂ ∘ b))
+
+UD-Functor .discard-coh (inl tt) = refl
+UD-Functor .discard-coh (inr (_ , _)) = refl
+UD-Functor .collect-fst (inl tt) _ = refl
+UD-Functor .collect-fst (inr (_ , _)) _ = refl
+UD-Functor .fmap-id (inl tt) = refl
+UD-Functor .fmap-id (inr (_ , _)) = refl
+UD-Functor .fmap-comp f g (inl tt) = refl
+UD-Functor .fmap-comp f g (inr (_ , _)) = refl
 
 U = Fix UD
 ⟦_⟧ : U → Set

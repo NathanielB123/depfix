@@ -1,24 +1,26 @@
 {-# OPTIONS --cubical-compatible --rewriting #-}
 
+open import Data.Product using (_×_; proj₁; proj₂)
+open import Function using (_∘_; id)
+open import Relation.Binary.PropositionalEquality 
+  using (_≡_)
+  renaming (trans to _∙_)
+
 open import IndRec
 
 module IndRecUtils where
 
-unfix : ∀ {B F} ⦃ _ : Functor B F ⦄ → Fix F → F (Fix F) fixInterpret
+unfix : ∀ {M F} ⦃ _ : Functor M F ⦄ → Fix F → F (Fix F) fixInterpret
 unfix = Fix-elim _ (λ d _ → d)
 
-fmap : ∀ {F} ⦃ _ : Functor Set F ⦄ {A B C} 
-    → (A → B) → F A (λ _ → C) → F B (λ _ → C)
-fmap f xs = collect xs (all _ f xs)
-
-record Foldable (B : Set₁) (F : (A : Set) → (A → B) → Set) : Set₁ where
-  field
-    ⦃ functor ⦄ : Functor B F
-    fold-interpret : F (Fix F) fixInterpret → B
-    collect-fix : ∀ {A} (xs : F (Fix F) fixInterpret) → All (λ _ → A) xs 
-                → F A (λ _ → fold-interpret xs)
-open Foldable ⦃...⦄ public
-  
-Fix-fold : ∀ {B F A} ⦃ _ : Foldable B F ⦄ → (∀ {i} → F A i → A)
+-- Catamorphisms for inductive-recursive functors are tricky (what should the 
+-- interpret function be?), but paramorphisms come out nicely!
+Fix-fold : ∀ {M F A} ⦃ _ : Functor M F ⦄ 
+         → (F (Fix F × A) (fixInterpret ∘ proj₁) → A)
          → Fix F → A
-Fix-fold {B} {F} {A} f xs = Fix-elim _ (λ d p → f (collect-fix d p)) xs
+Fix-fold {F = F} f xs
+  = Fix-elim _ (λ d p → f (collect d p)) xs
+
+collect-snd : ∀ {M F A i} ⦃ _ : Functor M F ⦄ (xs : F A (λ _ → i))
+            → fmap proj₂ (collect xs (all _ id xs)) ≡ xs
+collect-snd xs = discard-coh (collect xs (all _ id xs)) ∙ fmap-id xs

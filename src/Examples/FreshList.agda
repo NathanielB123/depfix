@@ -93,7 +93,7 @@ NonEmpty xs = case unfix xs of λ where
 -- Operations for reducing fresh lists
 
 length : ∀ {R} → List# A R → ℕ
-length = Fix-fold (λ where []# → 0; (_ ∷# xs) → suc xs)
+length = Fix-fold (λ where []# → 0; (_ ∷# (_ , l)) → suc l)
 
 ------------------------------------------------------------------------
 -- Operations for constructing fresh lists

@@ -4,7 +4,7 @@ import Agda.Builtin.Equality.Rewrite
 
 open import Relation.Binary.PropositionalEquality using (_≡_) 
 open import Function.Base using (id; _∘_)
-open import Data.Product using (Σ; _,_; proj₁; proj₂)
+open import Data.Product using (Σ; _×_; _,_; proj₁; proj₂)
 
 open import Utils
 
@@ -26,11 +26,11 @@ record Functor (F : Set → Set) : Set₁ where
   replace : ∀ {A B} (xs : F A) (ps : All (λ _ → B) xs) → F B
   replace xs = discard ∘ collect xs
 
-  fmap : ∀ {A B : Set} → (A → B) → F A → F B
+  fmap : ∀ {A B} → (A → B) → F A → F B
   fmap f xs = replace xs (all _ f xs)
 
   field
-    discard-coh : ∀ {A B} (xs : F (Σ A (λ _ → B))) 
+    discard-coh : ∀ {A B} (xs : F (A × B)) 
                 → fmap proj₂ xs ≡ discard xs
     collect-fst : ∀ {A P} (xs : F A) (p : _) 
                 → fmap proj₁ (collect xs (all P p xs)) ≡ xs
@@ -44,9 +44,9 @@ postulate
   Fix : ∀ (F : Set → Set) → ⦃ Functor F ⦄ → Set
   fix : ∀ {F : Set → Set} ⦃ _ : Functor F ⦄ → F (Fix F) → Fix F
   Fix-elim : ∀ {F} ⦃ _ : Functor F ⦄ (P : Fix F → Set) 
-            → ((d : F (Fix F)) → All P d → P (fix d)) → ∀ x → P x
+           → ((d : F (Fix F)) → All P d → P (fix d)) → ∀ x → P x
   fixβ : ∀ {F} ⦃ _ : Functor F ⦄ (P : Fix F → Set) 
-            (m : (d : F (Fix F)) → All P d → P (fix d)) d 
-        → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)
+           (m : (d : F (Fix F)) → All P d → P (fix d)) d 
+       → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)
 
 {-# REWRITE fixβ #-}

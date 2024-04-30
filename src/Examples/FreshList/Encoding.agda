@@ -45,27 +45,24 @@ module _ (A : Set) where
     freshD r (cons x xs _) a = R a x × r xs a
 
     List#D-Functor : Functor (A → Set) List#D
-    List#D-Functor .All = List#D-All
-    List#D-Functor .all = List#D-all
-    List#D-Functor .collect = List#D-collect
-    List#D-Functor .identity [] = refl
-    List#D-Functor .identity (cons x xs a) = refl
-    List#D-Functor .composition f g [] = refl
-    List#D-Functor .composition f g (cons x xs a) = refl
     List#D-Functor .interpret = freshD
+    List#D-Functor .All P [] = ⊤
+    List#D-Functor .All P (cons _ xs _) = P xs
+    List#D-Functor .all P p [] = tt
+    List#D-Functor .all P p (cons x xs a) = p xs
+    List#D-Functor .collect [] tt = []
+    List#D-Functor .collect (cons x xs a) p = cons x (xs , p) a
+    List#D-Functor .discard [] = []
+    List#D-Functor .discard (cons x (xs , p) a) = cons x p a
+    List#D-Functor .discard-coh [] = refl
+    List#D-Functor .discard-coh (cons _ _ _) = refl
+    List#D-Functor .collect-fst [] _ = refl
+    List#D-Functor .collect-fst (cons _ _ _) _ = refl
+    List#D-Functor .fmap-id [] = refl
+    List#D-Functor .fmap-id (cons _ _ _) = refl
+    List#D-Functor .fmap-comp f g [] = refl
+    List#D-Functor .fmap-comp f g (cons _ _ _) = refl
 
 instance
   List#D-Functor-inst : ∀ {A R} → Functor (A → Set) (List#D A)
 List#D-Functor-inst {R = R} = List#D-Functor _ R
-
-
-List#DFoldable : ∀ {A} R → Foldable (A → Set) (List#D A)
-List#DFoldable R .functor = List#D-Functor _ R
-List#DFoldable _ .fold-interpret [] _ = ⊥
-List#DFoldable _ .fold-interpret (cons x xs _) _ = fixInterpret xs x
-List#DFoldable _ .collect-fix [] tt = inl tt
-List#DFoldable _ .collect-fix (cons x xs f) p = cons x p f
-
-instance
-  List#DFoldable-inst : ∀ {A R} → Foldable (A → Set) (List#D A)
-List#DFoldable-inst {R = R} = List#DFoldable R 
