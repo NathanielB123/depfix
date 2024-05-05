@@ -18,7 +18,7 @@ record Functor (F : Set → Set) : Set₁ where
     -- for 'collect'!
     -- https://agda.zulipchat.com/#narrow/stream/238741-general/topic/Formalising.20Inductive.20Types/near/433118420
     collect : ∀ {A P} (xs : F A) (ps : All P xs) → F (Σ A P)
-    discard : ∀ {A B} → F (Σ A (λ _ → B)) → F B
+    discard : ∀ {A B} → F (A × B) → F B
 
   -- Note that 'replace' is all that is needed to state the functor laws
   -- (i.e. splitting into 'collect' and 'discard' is overkill) but being able
@@ -32,7 +32,7 @@ record Functor (F : Set → Set) : Set₁ where
   field
     discard-coh : ∀ {A B} (xs : F (A × B)) 
                 → fmap proj₂ xs ≡ discard xs
-    collect-fst : ∀ {A P} (xs : F A) (p : _) 
+    collect-fst : ∀ {A P} (xs : F A) p 
                 → fmap proj₁ (collect xs (all P p xs)) ≡ xs
     fmap-id     : ∀ {A} (xs : F A) → fmap id xs ≡ xs
     fmap-comp   : ∀ {A B C} (f : A → B) (g : B → C) xs 
