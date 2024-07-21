@@ -37,12 +37,12 @@ record Functor (I : Set) (F : (I → Set) → I → Set) : Set₁ where
 open Functor ⦃...⦄ public
 
 postulate
-  Fix : ∀ {M} F → ⦃ Functor M F ⦄ → M → Set
-  fix : ∀ {M F i} ⦃ _ : Functor M F ⦄ → F (Fix F) i → Fix F i
-  Fix-elim : ∀ {M F} ⦃ _ : Functor M F ⦄ (P : ∀ i → Fix F i → Set)
+  Fix : ∀ {I} F → ⦃ Functor I F ⦄ → I → Set
+  fix : ∀ {I F i} ⦃ _ : Functor I F ⦄ → F (Fix F) i → Fix F i
+  Fix-elim : ∀ {I F} ⦃ _ : Functor I F ⦄ (P : ∀ i → Fix F i → Set)
             → (∀ {i} (d : F (Fix F) i) → All P d → P i (fix d)) 
             → ∀ {i} (x : Fix F i) → P i x
-  fixβ : ∀ {M F} ⦃ _ : Functor M F ⦄ (P : ∀ i → Fix F i → Set)
+  fixβ : ∀ {I F} ⦃ _ : Functor I F ⦄ (P : ∀ i → Fix F i → Set)
            (m : ∀ {i} → (d : F (Fix F) i) → All P d → P i (fix d)) {i} 
            (d : F (Fix F) i) 
        → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)

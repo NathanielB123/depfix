@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --rewriting #-}
+{-# OPTIONS --without-K --rewriting #-}
 
 open import Data.Nat using (ℕ; suc; zero) renaming (_+_ to _+ℕ_)
 open import Function using (_∘_; case_of_)
@@ -27,6 +27,7 @@ VecD-Functor .collect (inl p) tt = inl p
 VecD-Functor .collect (inr (n , x , xs , p)) q = inr (n , x , (xs , q) , p)
 VecD-Functor .discard (inl p) = inl p
 VecD-Functor .discard (inr (n , x , (xs , q) , p)) = inr (n , x , q , p)
+
 VecD-Functor .discard-coh (inl _) = refl
 VecD-Functor .discard-coh (inr _) = refl
 VecD-Functor .collect-fst (inl _) _ = refl
