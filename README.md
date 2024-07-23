@@ -20,22 +20,24 @@ I haven't found any treatment of encoding inductive definitions in the literatur
 - Universes of descriptions ([Descriptions](https://effectfully.blogspot.com/2016/04/descriptions.html))
   - `DepFix` can be viewed as the very starting-point in implementing a universe of datatype descriptions: I have specified the operations I would like to have defined over all in-univese types and laws I would like to hold, but refrained from actually choosing any specific set of type codes/implementing said operations up-front. 
   - A neat trick which one can play with descriptions is that they themselves are just datatypes and so, with care, one can describe a universe of descriptions in terms of itself (see [The Gentle Art of Levitation](https://personal.cis.strath.ac.uk/conor.mcbride/levitation.pdf)). In comparison, "levitation" for `DepFix` (inside a theory which already supports and exposes the `Fix`/`fix` primitives) is trivial.
-  Specifically, all we need is a datatype like
-  ```agda
-  data MyFix (F : Set → Set) ⦃ _ : Functor F ⦄ : Set where
-    fix : F (Fix F) → Fix F
-  ```
-  and the functor-encoding of this is simply
-  ```agda
-  MyFixD : (F : Set → Set) → ⦃ Functor F ⦄ → Set → Set
-  MyFixD F A = F A
-
-  instance
-    FixD-Functor : ∀ {F} ⦃ f : Functor F ⦄ → Functor (FixD F)
-    FixD-Functor ⦃ f ⦄ = f
-
-  MyFix = Fix MyFixD
-  ```
+    
+    Specifically, all we need is a datatype like
+    ```agda
+    data MyFix (F : Set → Set) ⦃ _ : Functor F ⦄ : Set where
+      fix : F (Fix F) → Fix F
+    ```
+    and the functor-encoding of this is simply
+    
+    ```agda
+    MyFixD : (F : Set → Set) → ⦃ Functor F ⦄ → Set → Set
+    MyFixD F A = F A
+  
+    instance
+      FixD-Functor : ∀ {F} ⦃ f : Functor F ⦄ → Functor (FixD F)
+      FixD-Functor ⦃ f ⦄ = f
+  
+    MyFix = Fix MyFixD
+    ```
   - An obvious disadvantage of `DepFix` vs descriptions is that we have less control over the set of inductive datatypes one can define (e.g. I don't know of a way to ensure strict positivity). For this reason, and some more subtle technical ones regarding how Agda does it's positivity and termination checking (see the explanation at the bottom of [Simple.agda](./src/Simple.agda)) we cannot implement `DepFix` in `--safe` Agda.
 
 If anyone knows of any papers/other resources exploring similar approaches to adding recursive types in dependent type systems please let me know! I'm honestly quite surprised this inductive-datatypes-directly-as-fixpoints-of-functors approach isn't more common.
