@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --rewriting #-}
+{-# OPTIONS --cubical-compatible --rewriting --local-confluence-check #-}
 
 import Agda.Builtin.Equality.Rewrite
 
@@ -45,6 +45,10 @@ postulate
   fix : ∀ {F : Set → Set} ⦃ _ : Functor F ⦄ → F (Fix F) → Fix F
   Fix-elim : ∀ {F} ⦃ _ : Functor F ⦄ (P : Fix F → Set) 
            → ((d : F (Fix F)) → All P d → P (fix d)) → ∀ x → P x
+  -- We might hope for a Fix-elim which doesn't block on expecting a "fix d"
+  -- i.e. something like
+  -- > Fix-elim P m d ≡ m (unfix d) (all P (Fix-elim P m) (unfix d))
+  -- Unfortunately, in practice, this causes typechecker loops
   fixβ : ∀ {F} ⦃ _ : Functor F ⦄ (P : Fix F → Set) 
            (m : (d : F (Fix F)) → All P d → P (fix d)) d 
        → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)

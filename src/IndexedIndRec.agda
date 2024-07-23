@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical-compatible --rewriting #-}
+{-# OPTIONS --cubical-compatible --rewriting --local-confluence-check #-}
 
 import Agda.Builtin.Equality.Rewrite
 
@@ -8,6 +8,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_)
 
 module IndexedIndRec where
 
+-- We break 'fixInterpret' off from the main definition of 'Functor' here to 
+-- allow for a bit of extra flexibility when implementing such functions
+--
+-- Perhaps an alternative design could involve having special behaviour for if
+-- M is itself a 'Functor' (i.e. having 'interpret' no longer return just 'M')
 record PreFunctor (I : Set) (M : Set₁) 
                   (F : (A : I → Set) → (∀ i → A i → M) → I → Set) : Set₁ where
   field
@@ -61,117 +66,39 @@ postulate
                {i} (d : F (Fix F) _ i)
            → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)
 
--- Functor with 'fixInterpret' defined incrementally
-record IncFunctor (I : Set) (M : Set₁) 
-                (F : (A : I → Set) → (∀ i → A i → M) → I → Set) : Set₁ where
+unfix : ∀ {I M F} ⦃ _ : Functor I M F ⦄ {i} → Fix F i → F (Fix F) fixInterpret i
+unfix = Fix-elim _ (λ xs ps → xs)
+
+-- Functor with 'fixInterpret' defined recursively instead of in one go
+record RecFunctor (I : Set) (M₁ : Set₁) (M₂ : Set₁) 
+                (F : (A : I → Set) → (∀ i → A i → M₂) → I → Set) : Set₁ where
   field
-    ⦃ prefunc ⦄ : PreFunctor I M F
-    interpret : ∀ {A i} ι → F A ι i → M
-open IncFunctor ⦃...⦄ public
+    interpret : ∀ {A i} ι → F A ι i → M₁
+open RecFunctor ⦃...⦄ public
 
 postulate
-  fixInterpretInc : ∀ {I M F} ⦃ _ : IncFunctor I M F ⦄ i → Fix F i → M
-  fixInc : ∀ {I M F i} ⦃ _ : IncFunctor I M F ⦄ → F (Fix F) fixInterpretInc i 
-         → Fix F i
+  fixInterpretRec : ∀ {I M₁ M₂ F} ⦃ _ : RecFunctor I M₁ M₂ F ⦄ ⦃ _ : PreFunctor I M₂ F ⦄ i → Fix F i → M₁
+  fixInterpretRecβ : ∀ {I M₁ M₂ F}  ⦃ _ : RecFunctor I M₁ M₂ F ⦄ ⦃ f : Functor I M₂ F ⦄ i 
+                       (xs : F (Fix F) fixInterpret i)
+                   → fixInterpretRec i (fix xs)
+                   ≡ interpret fixInterpret xs 
 
-IncFunctor→Functor : ∀ {I M F} → ⦃ IncFunctor I M F ⦄ → Functor I M F
-IncFunctor→Functor .fixInterpret = fixInterpretInc
+{-# REWRITE fixβ fixInterpretRecβ #-}
 
-unfix : ∀ {I M F} ⦃ _ : Functor I M F ⦄ {i} → Fix F i → F (Fix F) fixInterpret i
-unfix {F = F} = Fix-elim (λ i _ → F (Fix F) fixInterpret i) (λ xs ps → xs)
+-- Utils
 
-postulate 
-  fixIncConf : (λ {I M F i} ⦃ _ : IncFunctor I M F ⦄ → fixInc {I} {M} {F} {i}) 
-             ≡ fix ⦃ IncFunctor→Functor ⦄
-
-  fixInterpretIncβ : ∀ {I M F}  ⦃ _ : IncFunctor I M F ⦄ i 
-                       (xs : Fix F i)
-                   → fixInterpretInc i xs
-                   ≡ interpret fixInterpretInc (unfix ⦃ IncFunctor→Functor ⦄ xs)  
-  -- unfix (fix xs) ≡ xs holds by definition, but I don't think 
-  -- fix (unfix xs) ≡ xs is provable...
-  fix-unfix-id : ∀ {I M F i} ⦃ _ : Functor I M F ⦄ (xs : Fix F i) 
-               → fix (unfix xs) ≡ xs
-
-{-# REWRITE fixβ fixInterpretIncβ fixIncConf fix-unfix-id #-}
-
-open import Data.Unit using (⊤; tt)
-open import Data.Empty using (⊥)
-open import Data.Product using (∃; _,_)
 open import Relation.Binary.PropositionalEquality using (refl)
-open import Data.Bool using (Bool; true; false)
-open import Level using (lift; lower; Lift; 0ℓ; suc)
-open import Function using (case_of_)
 
-open import Utils
-
-module TTinTT where
-
-
-  data CtxD (CtxR : Set) (TyR : CtxR → Set) : Set where
-    ε   : CtxD CtxR TyR
-    _,_ : ∀ Γ → TyR Γ → CtxD CtxR TyR
-
-  TyPre : ∀ {CtxR TyR} → CtxD CtxR TyR → Set
-
-  instance 
-    CtxD-PreFunctor : PreFunctor ⊤ Set (λ where C r tt → CtxD (C tt) (r tt))
-  CtxD-PreFunctor .All P ε = ⊤
-  CtxD-PreFunctor .All P (Γ , A) = P tt Γ
-  CtxD-PreFunctor .all P p ε = tt
-  CtxD-PreFunctor .all P p (Γ , A) = p Γ
-  CtxD-PreFunctor .collect ε tt = ε
-  CtxD-PreFunctor .collect (Γ , A) PΓ = (Γ , PΓ) , A
-  CtxD-PreFunctor .discard ε = ε
-  CtxD-PreFunctor .discard ((Γ , PΓ) , A) = PΓ , A
- 
-  CtxD-PreFunctor .discard-coh ε = refl
-  CtxD-PreFunctor .discard-coh (Γ , A) = refl
-  CtxD-PreFunctor .collect-fst _ ε = refl
-  CtxD-PreFunctor .collect-fst _ (Γ , A) = refl
-  CtxD-PreFunctor .fmap-id ε = refl
-  CtxD-PreFunctor .fmap-id (Γ , A) = refl
-  CtxD-PreFunctor .fmap-comp _ _ ε = refl
-  CtxD-PreFunctor .fmap-comp _ _ (Γ , A) = refl
-
-  instance
-    CtxD-IncFunctor : IncFunctor ⊤ Set (λ where C r tt → CtxD (C tt) (r tt))
-    CtxD-IncFunctor .interpret ι Γ = TyPre Γ
-
-  instance CtxD-Functor : Functor ⊤ Set (λ where C r tt → CtxD (C tt) (r tt))
-  CtxD-Functor = IncFunctor→Functor
-
-  Ctx : Set
-  Ctx = Fix (λ where C r tt → CtxD (C tt) (r tt)) tt
-
-  data TyPreD {CtxR TyR} (TyPreR : CtxD CtxR TyR → Set)
-              (,R : (Γ : CtxD CtxR TyR) → TyPreR Γ → Lift (suc 0ℓ) (CtxD CtxR TyR))
-              (Γ : CtxD CtxR TyR) : Set 
-              where
-    U : TyPreD TyPreR ,R Γ
-    Π : (A : TyPreR Γ) → TyPreR (lower (,R Γ A))
-      → TyPreD TyPreR ,R Γ
-
-  -- TODO: Fill at the rest of the functor stuff for types
-  instance 
-    TyPreD-PreFunctor : ∀ {CtxR TyR} 
-                      → PreFunctor (CtxD CtxR TyR) _ TyPreD
-  
-  TyPre = Fix TyPreD
-
-  instance
-    TyPreD-Functor : Functor (CtxD Ctx (fixInterpret tt)) _ TyPreD
-  TyPreD-Functor .prefunc = TyPreD-PreFunctor
-  TyPreD-Functor .fixInterpret Γ A = lift (fix Γ , A)
-
-  Ty : Ctx → Set
-  Ty Γ = TyPre (unfix Γ)
-
-  _,c_ : ∀ Γ → Ty Γ → Ctx
-  Γ ,c A = fix (Γ , A)
-
-  Πtest : ∀ {Γ} (A : Ty Γ) → Ty (Γ ,c A) → Ty Γ
-  Πtest A B = fix (Π A B)
+-- A RecFunctor with interpret defined on the whole domain of M can be
+-- immediately turned into a Functor
+RecFunctor→Functor : ∀ {I M F} → ⦃ PreFunctor I M F ⦄ → ⦃ RecFunctor I M M F ⦄ 
+                   → Functor I M F
+RecFunctor→Functor .prefunc = _
+RecFunctor→Functor .fixInterpret = fixInterpretRec
 
 
-     
+fix-unfix-id : ∀ {I M F i} ⦃ _ : Functor I M F ⦄ (xs : Fix F i) 
+              → fix (unfix xs) ≡ xs
+fix-unfix-id xs = Fix-elim (λ _ xs → fix (unfix xs) ≡ xs) (λ _ _ → refl) xs
+
+-- {-# REWRITE fix-unfix-id #-}

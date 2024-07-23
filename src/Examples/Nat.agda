@@ -50,7 +50,6 @@ suc = fix ∘ inr
 add : Nat → Nat → Nat
 add x y = Fix-fold (λ where (inl tt) → y; (inr x) → fix (inr x)) x
 
-add-zero : ∀ x → x ≡ add x zero
 add-zero = Fix-elim _ (λ where (inl tt) tt → refl; (inr y) → cong suc)
 
 add-suc : ∀ x y → suc (add x y) ≡ add x (suc y)
