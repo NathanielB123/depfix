@@ -54,3 +54,29 @@ postulate
        → Fix-elim P m (fix d) ≡ m d (all P (Fix-elim P m) d)
 
 {-# REWRITE fixβ #-}
+
+-- Alternatively, we can implement these postulates with an Agda datatype. 
+
+-- Agda of course won't accept that 'Fix' is strictly positive (for
+-- one, our scheme allows encoding non-strictly positive functors so this
+-- is kind of inevitable, but even if Agda allowed non-strictly positive
+-- inductive definitions, 'Fix' still doesn't satisfy this criteria
+-- syntactically/definitionally)
+
+-- Agda also won't accept Fix-elim, as defined below, as terminating.
+-- Termination here hinges on 'all' only calling 'Fix-elim P p' on smaller terms
+-- than 'fix x'. This is enforced by the definition of 'Functor': type 'A' is
+-- abstract, so (assuming parametricity) the only way to get one's hands on a 
+-- value of that type is via breaking apart the  'xs'. Perhaps we could convince
+-- Agda of termination here by adding an additional law or two to 'Functor' and
+-- using well-founded induction, but I don't think the extra noise would be 
+-- worth it.
+
+-- {-# NO_POSITIVITY_CHECK #-}
+-- data Fix (F : Set → Set) ⦃ f : Functor F ⦄ : Set where
+--   fix : F (Fix F) → Fix F
+
+-- {-# TERMINATING #-}
+-- Fix-elim : ∀ {F} ⦃ _ : Functor F ⦄ (P : Fix F → Set) 
+--          → ((d : F (Fix F)) → All P d → P (fix d)) → ∀ x → P x
+-- Fix-elim P p (fix x) = p x (all P (Fix-elim P p) x)

@@ -84,21 +84,3 @@ postulate
                    ≡ interpret fixInterpret xs 
 
 {-# REWRITE fixβ fixInterpretRecβ #-}
-
--- Utils
-
-open import Relation.Binary.PropositionalEquality using (refl)
-
--- A RecFunctor with interpret defined on the whole domain of M can be
--- immediately turned into a Functor
-RecFunctor→Functor : ∀ {I M F} → ⦃ PreFunctor I M F ⦄ → ⦃ RecFunctor I M M F ⦄ 
-                   → Functor I M F
-RecFunctor→Functor .prefunc = _
-RecFunctor→Functor .fixInterpret = fixInterpretRec
-
-
-fix-unfix-id : ∀ {I M F i} ⦃ _ : Functor I M F ⦄ (xs : Fix F i) 
-              → fix (unfix xs) ≡ xs
-fix-unfix-id xs = Fix-elim (λ _ xs → fix (unfix xs) ≡ xs) (λ _ _ → refl) xs
-
--- {-# REWRITE fix-unfix-id #-}
