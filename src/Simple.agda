@@ -12,6 +12,8 @@ module Simple where
 
 record Functor (F : Set → Set) : Set₁ where
   field
+    -- Idea and naming behind 'All'/'all' originates from 
+    -- https://personal.cis.strath.ac.uk/conor.mcbride/levitation.pdf
     All     : ∀ {A} (P : A → Set) → F A → Set
     all     : ∀ {A} (P : A → Set) (p : ∀ x → P x) xs → All P xs
     -- Thanks to Peio Borthelle on the Agda Zulip for suggesting this signature 
