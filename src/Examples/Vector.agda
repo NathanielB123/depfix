@@ -6,6 +6,7 @@ open import Data.Product using (Σ; _×_; proj₁; proj₂; _,_)
 open import Relation.Binary.PropositionalEquality using (_≡_; cong; refl)
   renaming (trans to _∙_)
 open import Data.Unit using (⊤; tt)
+open import Level using (Lift; lift)
 
 open import Indexed
 open import IndexedUtils
@@ -19,11 +20,11 @@ module _ (A : Set) where
 
 instance
   VecD-Functor : ∀ {A} → Functor _ (VecD A)
-VecD-Functor .All P (inl p) = ⊤
+VecD-Functor .All P (inl p) = Lift _ ⊤
 VecD-Functor .All P (inr (n , x , xs , p)) = P n xs
-VecD-Functor .all P p (inl q) = tt
+VecD-Functor .all P p (inl q) = lift tt
 VecD-Functor .all P p (inr (n , x , xs , q)) = p xs
-VecD-Functor .collect (inl p) tt = inl p
+VecD-Functor .collect (inl p) (lift tt) = inl p
 VecD-Functor .collect (inr (n , x , xs , p)) q = inr (n , x , (xs , q) , p)
 VecD-Functor .discard (inl p) = inl p
 VecD-Functor .discard (inr (n , x , (xs , q) , p)) = inr (n , x , q , p)
@@ -47,7 +48,7 @@ vecElim : ∀ {A} (P : ∀ i → Vec A i → Set)
         → P _ (fix []) → (∀ {i} x xs → P i xs → P _ (fix (x ∷ xs)))
         → ∀ {i} xs → P i xs
 vecElim P P[] P∷ xs = Fix-elim P (λ where 
-  [] tt → P[]
+  [] (lift tt) → P[]
   (x ∷ xs) ps → P∷ x xs ps) xs
 
 take : ∀ {A} m {n} → Vec A (m +ℕ n) → Vec A m

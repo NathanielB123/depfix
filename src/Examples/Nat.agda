@@ -6,6 +6,7 @@ open import Relation.Binary.PropositionalEquality
 open import Data.Unit using (⊤; tt)
 open import Data.Product using (_,_)
 open import Function using (_∘_; id)
+open import Level using (Level; Lift; lift)
 
 open import Utils
 open import Simple
@@ -16,49 +17,43 @@ module Examples.Nat where
 NatD : Set → Set
 NatD N = ⊤ + N
 
-NatD-All : ∀ {A} (P : A → Set) → NatD A → Set
-NatD-All P (inl tt) = ⊤
-NatD-All P (inr x) = P x
+pattern zero = inl tt
+pattern suc n = inr n
 
 instance NatD-Functor : Functor NatD
 
-NatD-Functor .All = NatD-All
-NatD-Functor .all P f (inl tt) = tt
-NatD-Functor .all P f (inr x) = f x
-NatD-Functor .collect (inl tt) tt = inl tt
-NatD-Functor .collect (inr x) p = inr (x , p)
-NatD-Functor .discard (inl tt) = inl tt
-NatD-Functor .discard (inr (_ , y)) = inr y
+NatD-Functor .All P zero = Lift _ ⊤
+NatD-Functor .All P (suc x) = P x
+NatD-Functor .all P f zero = lift tt
+NatD-Functor .all P f (suc x) = f x
+NatD-Functor .replace zero (lift tt) = zero
+NatD-Functor .replace (suc x) y = suc y
 
-NatD-Functor .discard-coh (inl tt) = refl
-NatD-Functor .discard-coh (inr (_ , _)) = refl
-NatD-Functor .collect-fst (inl tt) p = refl
-NatD-Functor .collect-fst (inr x) p = refl
-NatD-Functor .fmap-id (inl tt) = refl
-NatD-Functor .fmap-id (inr _) = refl
-NatD-Functor .fmap-comp f g (inl tt) = refl
-NatD-Functor .fmap-comp f g (inr _) = refl
+NatD-Functor .fmap-comp f g zero = refl
+NatD-Functor .fmap-comp f g (suc _) = refl
+NatD-Functor .fmap-id zero = refl
+NatD-Functor .fmap-id (suc _) = refl
 
 Nat = Fix NatD
 
-zero : Nat
-zero = fix (inl tt)
+fzero : Nat
+fzero = fix zero
 
-suc : Nat → Nat
-suc = fix ∘ inr
+fsuc : Nat → Nat
+fsuc  = fix ∘ suc
 
 add : Nat → Nat → Nat
-add x y = Fix-fold (λ where (inl tt) → y; (inr x) → fix (inr x)) x
+add x y = Fix-fold (λ where zero → y; (suc x) → fsuc x) x
 
-add-zero = Fix-elim _ (λ where (inl tt) tt → refl; (inr y) → cong suc)
+add-zero = Fix-elim _ (λ where zero (lift tt) → refl; (suc y) → cong fsuc)
 
-add-suc : ∀ x y → suc (add x y) ≡ add x (suc y)
-add-suc x y = Fix-elim (λ z → suc (add z y) ≡ add z (suc y)) 
-                        (λ where (inl tt) tt → refl; (inr y) → cong suc) x
+add-suc : ∀ x y → fsuc (add x y) ≡ add x (fsuc y)
+add-suc x y = Fix-elim (λ z → fsuc (add z y) ≡ add z (fsuc y)) 
+                       (λ where zero (lift tt) → refl; (suc y) → cong fsuc) x
 
 add-commutes : ∀ x y → add x y ≡ add y x
 add-commutes x y 
   = Fix-elim (λ z → add z y ≡ add y z) 
               (λ where 
-                (inl tt) tt → add-zero y
-                (inr z) p → cong suc p ∙ add-suc y z) x
+                zero (lift tt) → add-zero y
+                (suc z) p → cong fsuc p ∙ add-suc y z) x

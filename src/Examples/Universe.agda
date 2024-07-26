@@ -31,8 +31,8 @@ UD-Functor .discard (inr ((a , p) , b)) = inr (p , (proj₂ ∘ b))
 
 UD-Functor .discard-coh (inl tt) = refl
 UD-Functor .discard-coh (inr (_ , _)) = refl
-UD-Functor .collect-fst (inl tt) _ = refl
-UD-Functor .collect-fst (inr (_ , _)) _ = refl
+UD-Functor .collect-pairs (inl tt) _ = refl
+UD-Functor .collect-pairs (inr (_ , _)) _ = refl
 UD-Functor .fmap-id (inl tt) = refl
 UD-Functor .fmap-id (inr (_ , _)) = refl
 UD-Functor .fmap-comp f g (inl tt) = refl

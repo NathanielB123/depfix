@@ -56,8 +56,8 @@ module _ (A : Set) where
     List#D-Functor .discard (cons x (xs , p) a) = cons x p a
     List#D-Functor .discard-coh [] = refl
     List#D-Functor .discard-coh (cons _ _ _) = refl
-    List#D-Functor .collect-fst [] _ = refl
-    List#D-Functor .collect-fst (cons _ _ _) _ = refl
+    List#D-Functor .collect-pairs [] _ = refl
+    List#D-Functor .collect-pairs (cons _ _ _) _ = refl
     List#D-Functor .fmap-id [] = refl
     List#D-Functor .fmap-id (cons _ _ _) = refl
     List#D-Functor .fmap-comp f g [] = refl

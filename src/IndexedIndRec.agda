@@ -2,7 +2,7 @@
 
 import Agda.Builtin.Equality.Rewrite
 
-open import Data.Product using (Σ; _×_; proj₁; proj₂)
+open import Data.Product using (Σ; _×_; _,_; proj₁; proj₂)
 open import Function using (id; _∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
@@ -25,17 +25,22 @@ record PreFunctor (I : Set) (M : Set₁)
     discard : ∀ {A B : I → Set} {ι i} 
             → F (λ i → A i × B i) (λ i → ι i ∘ proj₂) i → F B ι i
 
+  replace : ∀ {A B i} {ι : I → M} (xs : F A (λ i _ → ι i) i) 
+              (ps : All (λ i _ → B i) xs) 
+          → F B (λ i _ → ι i) i
+  replace xs ps = discard (collect xs ps)
+
   fmap : ∀ {A B i} {ι : I → M} → (∀ {i} → A i → B i) 
        → F A (λ i _ → ι i) i → F B (λ i _ → ι i) i
-  fmap f xs = discard (collect xs (all _ f xs))
+  fmap f xs = replace xs (all _ f xs)
 
   field
     discard-coh : ∀ {A B : I → Set} {ι : I → M} {i} 
                     (xs : F (λ i → A i × B i) (λ i _ → ι i) i)
                 → fmap proj₂ xs ≡ discard xs
-    collect-fst : ∀ {A P} {ι : I → M} (p : ∀ {i} x → P i x)
-                    {i} (xs : F A (λ i _ → ι i) i) 
-                → fmap proj₁ (collect xs (all P p xs)) ≡ xs
+    collect-pairs : ∀ {A P} {ι : I → M} (p : ∀ {i} x → P i x)
+                    {i} (xs : F A (λ i _ → ι i) i)
+                  → fmap (λ x → x , p x) xs ≡ collect xs (all P p xs)
     fmap-id     : ∀ {A} {ι : I → M} {i} (xs : F A (λ i _ → ι i) i) 
                 → fmap id xs ≡ xs
     fmap-comp   : ∀ {A B C : I → Set} {ι : I → M}
@@ -77,8 +82,11 @@ record RecFunctor (I : Set) (M₁ : Set₁) (M₂ : Set₁)
 open RecFunctor ⦃...⦄ public
 
 postulate
-  fixInterpretRec : ∀ {I M₁ M₂ F} ⦃ _ : RecFunctor I M₁ M₂ F ⦄ ⦃ _ : PreFunctor I M₂ F ⦄ i → Fix F i → M₁
-  fixInterpretRecβ : ∀ {I M₁ M₂ F}  ⦃ _ : RecFunctor I M₁ M₂ F ⦄ ⦃ f : Functor I M₂ F ⦄ i 
+  fixInterpretRec : ∀ {I M₁ M₂ F} 
+                      ⦃ _ : RecFunctor I M₁ M₂ F ⦄  ⦃ _ : PreFunctor I M₂ F ⦄ i 
+                  → Fix F i → M₁
+  fixInterpretRecβ : ∀ {I M₁ M₂ F}  
+                       ⦃ _ : RecFunctor I M₁ M₂ F ⦄ ⦃ _ : Functor I M₂ F ⦄ i 
                        (xs : F (Fix F) fixInterpret i)
                    → fixInterpretRec i (fix xs)
                    ≡ interpret fixInterpret xs 

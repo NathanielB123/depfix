@@ -54,8 +54,8 @@ instance
 
   CtxD-PreFunctor .discard-coh ε = refl
   CtxD-PreFunctor .discard-coh (Γ , A) = refl
-  CtxD-PreFunctor .collect-fst _ ε = refl
-  CtxD-PreFunctor .collect-fst _ (Γ , A) = refl
+  CtxD-PreFunctor .collect-pairs _ ε = refl
+  CtxD-PreFunctor .collect-pairs _ (Γ , A) = refl
   CtxD-PreFunctor .fmap-id ε = refl
   CtxD-PreFunctor .fmap-id (Γ , A) = refl
   CtxD-PreFunctor .fmap-comp _ _ ε = refl
@@ -84,8 +84,8 @@ instance
 
   TyPreD-PreFunctor .discard-coh U = refl
   TyPreD-PreFunctor .discard-coh (Π _ _) = refl
-  TyPreD-PreFunctor .collect-fst _ U = refl
-  TyPreD-PreFunctor .collect-fst _ (Π _ _) = refl
+  TyPreD-PreFunctor .collect-pairs _ U = refl
+  TyPreD-PreFunctor .collect-pairs _ (Π _ _) = refl
   TyPreD-PreFunctor .fmap-id U = refl
   TyPreD-PreFunctor .fmap-id (Π _ _) = refl
   TyPreD-PreFunctor .fmap-comp _ _ U = refl

@@ -2,7 +2,8 @@
 
 open import Data.Product using (∃; _,_; proj₁)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-open import Function using (_∘_)
+open import Function using (_∘_; id)
+open import Data.Unit using (⊤; tt)
 
 open import Indexed
 
@@ -18,3 +19,6 @@ unfix≡ xs
 
 unfix : ∀ {I F i} ⦃ _ : Functor I F ⦄ → Fix F i → F (Fix F) i
 unfix = proj₁ ∘ unfix≡
+
+index⊤ : ∀ {ℓ} → (Set ℓ → Set ℓ) → (⊤ → Set ℓ) → ⊤ → Set ℓ
+index⊤ F i tt = F (i tt)
