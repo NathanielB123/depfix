@@ -42,7 +42,7 @@ pattern Π A B = inr (A Σ, B)
 TyPre : ∀ {CtxR TyR} → CtxD CtxR TyR → Set
 
 instance 
-  CtxD-PreFunctor : PreFunctor ⊤ Set (λ where C r tt → CtxD (C tt) (r tt))
+  CtxD-PreFunctor : PreFunctor ⊤ _ (λ where C r tt → CtxD (C tt) (r tt))
   CtxD-PreFunctor .All P ε = ⊤
   CtxD-PreFunctor .All P (Γ , A) = P tt Γ
   CtxD-PreFunctor .all P p ε = tt
@@ -62,10 +62,10 @@ instance
   CtxD-PreFunctor .fmap-comp _ _ (Γ , A) = refl
 
 instance
-  CtxD-RecFunctor : RecFunctor ⊤ Set _ (λ where C r tt → CtxD (C tt) (r tt))
+  CtxD-RecFunctor : RecFunctor ⊤ _ _ (λ where C r tt → CtxD (C tt) (r tt))
   CtxD-RecFunctor .interpret ι Γ = TyPre Γ
 
-instance CtxD-Functor : Functor ⊤ Set (λ where C r tt → CtxD (C tt) (r tt))
+instance CtxD-Functor : Functor ⊤ _ (λ where C r tt → CtxD (C tt) (r tt))
 CtxD-Functor = RecFunctor→Functor
 
 Ctx = Fix (λ where C r tt → CtxD (C tt) (r tt)) tt
