@@ -64,7 +64,7 @@ postulate
 -- Termination here hinges on 'all' only calling 'Fix-elim P p' on smaller terms
 -- than 'fix x'. This is enforced by the definition of 'Functor': type 'A' is
 -- abstract, so (assuming parametricity) the only way to get one's hands on a 
--- value of that type is via breaking apart the  'xs'. Perhaps we could convince
+-- value of that type is via breaking apart the 'xs'. Perhaps we could convince
 -- Agda of termination here by adding an additional law or two to 'Functor' and
 -- using well-founded induction, but I don't think the extra noise would be 
 -- worth it.

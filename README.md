@@ -9,12 +9,12 @@ Positive (but not strictly!) iso-recursive types implemented in Agda with `postu
 - Indexed Types: [Indexed.agda](./src/Indexed.agda)
   - Examples: [Vector.agda](./src/Examples/Vector.agda), [Forest.agda](./src/Examples/Forest.agda)
 - Inductive-Inductive Types: [IndexedIndRec.agda](./src/IndexedIndRec.agda) 
-  - Examples: [TTinTTSimple.agda](./src/Examples/TTinTTSimple.agda), [TTinTT.agda](./src/Examples/TTinTT.agda)
+  - Examples: [TTinTT.agda](./src/Examples/TTinTT.agda)
 
 ## Remaining Questions
 
 - Can we encode *truly nested* types (like bushes)?
-- Can large elimination be obtained *without* `Setω`?
+- Can we get large elimination *without* `Setω`?
   - I think parameterising `Functor` over the universe `Level` we will eliminate into (lifting it out from the signatures of `All`/`all`) would be a good starting point. However, this makes giving reasonable signatures for `replace`/`fmap` and the laws (which rely on taking the outputs from eliminating and collecting them back into the `Functor` structure) a challenge.
 
 ## Related Work
@@ -30,13 +30,13 @@ I haven't been able to find any treatment in the literature of encoding inductiv
     Specifically, all we need is a datatype like
     ```agda
     data MyFix (F : Set → Set) ⦃ _ : Functor F ⦄ : Set where
-      fix : F (Fix F) → Fix F
+      fix : F (MyFix F) → MyFix F
     ```
-    and the functor-encoding of this (obtained in the usual way - by replacing every recursive occurence of `MyFix F` with parameter `A`) is simply
+    and the functor-encoding of this (obtained in the usual way - by replacing every recursive occurence of `MyFix F` with parameter `MyFixR`) is simply
 
     ```agda
     MyFixD : (F : Set → Set) → ⦃ Functor F ⦄ → Set → Set
-    MyFixD F A = F A
+    MyFixD F MyFixR = F MyFixR
 
     MyFix : (F : Set → Set) → ⦃ Functor F ⦄ → Set
     MyFix F = Fix (MyFixD F)
