@@ -12,7 +12,7 @@ module IndexedIndRec where
 -- allow for a bit of extra flexibility when implementing such functions
 --
 -- Perhaps an alternative design could involve having special behaviour for if
--- M is itself a 'Functor' (i.e. having 'interpret' no longer return just 'M')
+-- M is itself a 'Functor' (i.e. having 'interpret' no longer return just 'M i')
 record PreFunctor (I : Set) (M : I → Set₁) 
                   (F : (A : I → Set) → (∀ i → A i → M i) → I → Set) : Set₁ where
   field

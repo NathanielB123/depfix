@@ -15,8 +15,7 @@ open import IndexedIndRecUtils
 
 -- A type-theory-in-type-theory-style inductive-inductive syntax of contexts
 -- and types. I think adding terms and substitutions as well should be do-able, 
--- but the
--- encoding gets very messy.
+-- but the encoding gets very messy.
 
 -- I am currently playing around in offline developments with adding a
 -- 'F A → A' assumption to 'All'/'all' (as a sort of early-acces to 'fix' before
