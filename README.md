@@ -3,7 +3,7 @@
 Positive (but not strictly!) iso-recursive types implemented in Agda with `postulate`s and `rewrite` rules. My main motivation with exploring this is to see if these ideas might work for the core theory of my own language (i.e. as an alternative to W-types/containers/descriptions). Take a look at the [Examples](./src/Examples)!
 
 - Positive Inductive Types: [Simple.agda](./src/Simple.agda)
-  - Examples: [Nat.agda](./src/Examples/Nat.agda), [Forest.agda](./src/Examples/Forest.agda)
+  - Examples: [Nat.agda](./src/Examples/Nat.agda), [Forest.agda](./src/Examples/Forest.agda), [Containers.agda](./src/Examples/Containers.agda)
 - Inductive-Recursive Types: [IndRec.agda](./src/IndRec.agda)
   - Examples: [Universe.agda](./src/Examples/Universe.agda), [FreshList.agda](.//src/Examples/FreshList.agda)
 - Indexed Types: [Indexed.agda](./src/Indexed.agda)

@@ -18,10 +18,22 @@ open import IndexedIndRecUtils
 -- but the encoding gets very messy.
 
 -- I am currently playing around in offline developments with adding a
--- 'F A → A' assumption to 'All'/'all' (as a sort of early-acces to 'fix' before
--- while 'Functor' is still being implemented) which I think should help with
--- the messiness, but there are still a ton of details to work out.
+-- 'F A → A' assumption to 'All'/'all' (as a sort of early-acces to 'fix' while 
+-- 'Functor' is still being implemented) which I think should help with the 
+-- messiness, but there are still a ton of details to work out.
 module Examples.TTinTT where
+
+module Goal where
+  data Ctx : Set
+  data Ty : Ctx → Set
+  
+  data Ctx where
+    ε : Ctx
+    _,_ : ∀ Γ → Ty Γ → Ctx
+
+  data Ty where
+    U : ∀ {Γ} → Ty Γ
+    Π : ∀ {Γ} A → Ty (Γ , A) → Ty Γ
 
 1ℓ : Level
 1ℓ = suc 0ℓ

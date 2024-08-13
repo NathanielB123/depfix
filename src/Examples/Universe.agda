@@ -10,12 +10,27 @@ open import IndRec
 
 module Examples.Universe where
 
+module Goal where
+  data U : Set
+  
+  ⟦_⟧ : U → Set
+
+  data U where
+    ⊤' : U
+    Π' : ∀ A → (⟦ A ⟧ → U) → U
+
+  ⟦ ⊤' ⟧ = ⊤
+  ⟦ Π' A B ⟧ = (x : ⟦ A ⟧) → ⟦ B x ⟧
+
 UD : (u : Set) → (u → Set) → Set
 UD u i = ⊤ + Σ u (λ a → i a → u)
 
+pattern ⊤' = inl tt
+pattern Π' A B = inr (A , B)
+
 _⟦_⟧D : ∀ {A} r → UD A r → Set
-r ⟦ inl tt ⟧D = ⊤
-r ⟦ inr (A , B) ⟧D = (a : r A) → r (B a)
+r ⟦ ⊤' ⟧D = ⊤
+r ⟦ Π' A B ⟧D = (a : r A) → r (B a)
 
 instance UD-Functor : Functor Set UD
 
